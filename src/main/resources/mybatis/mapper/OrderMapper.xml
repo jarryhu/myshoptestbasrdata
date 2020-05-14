@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hukun.uniappshopdata.basedata.mapper.OrderMapper">
+
+
+    <insert id="CreateOrder" parameterType="order">
+        insert into orders values(#{o_id},#{createTime},#{p_id},#{s1_id},#{s2_id},#{state},#{customer_id})
+    </insert>
+
+
+    <resultMap id="orderMap" type="OrderDetail">
+        <id column="o_id" property="o_id"></id>
+        <result column="s1_id" property="s1_id"></result>
+        <result column="s2_id" property="s2_id"></result>
+        <result column="createTime" property="createTime"></result>
+        <association property="customer" javaType="customer">
+            <id column="id" property="id"></id>
+        </association>
+        <association property="productDetail" javaType="productDetail">
+            <id column="p_id" property="id"></id>
+            <result column="productName" property="productName"></result>
+            <result column="image" property="image"></result>
+            <result column="productPrice" property="productPrice"></result>
+        </association>
+        <collection property="styles" ofType="style">
+            <id column="s_id" property="s_id"></id>
+            <result column="styleName" property="styleName"></result>
+        </collection>
+
+    </resultMap>
+
+
+    <select id="getOrderListBycid" parameterType="hashmap" resultMap="orderMap">
+        select o.o_id,
+        DATE_FORMAT(o.createTime, '%Y-%m-%d %h:%m:%s')  createTime,
+        o.state,
+        o.s1_id,
+        o.s2_id,
+        p.image,
+        p.productPrice,
+        p.productName,
+        s.s_id,
+        s.styleName
+        from orders o
+        left join productdetail p on o.p_id = p.id
+        left join customer c on o.customer_id = c.id
+        left join style s on o.s1_id = s.s_id or o.s2_id = s.s_id
+        where c.id = #{id}
+        <if test="state!=0 and state!=null">
+            and state=#{state}
+        </if>
+    </select>
+
+    <select id="getOrderListBycidCount" parameterType="hashmap" resultType="order">
+        select count(*) from orders where customer_id=#{id}
+        <if test="state!=0 and state!=null">
+            and state=#{state}
+        </if>
+    </select>
+
+
+</mapper>

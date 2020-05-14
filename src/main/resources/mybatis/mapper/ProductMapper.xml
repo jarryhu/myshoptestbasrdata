@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hukun.uniappshopdata.basedata.mapper.ProductMapper">
+
+    <select id="getProductByName" parameterType="hashmap" resultType="ProductDetail">
+        select * from productdetail
+        <where>
+            <if test="productName!=null and productName!=''">
+                productName Like '%${productName}%'
+            </if>
+        </where>
+        limit #{pageStart},#{pageSize}
+    </select>
+
+    <select id="getProductCount" parameterType="string" resultType="integer">
+        select count(*) from productdetail
+        <where>
+            <if test="productName!=null and productName!=''">
+                productName Like '%${productName}%'
+            </if>
+        </where>
+    </select>
+
+
+    <resultMap id="productAndDiscuss" type="ProductDetailDiscuss">
+        <id column="p_id" property="id"></id>
+        <result column="p_productName" property="productName"></result>
+        <result column="p_image" property="image"></result>
+        <result column="p_image2" property="image2"></result>
+        <result column="p_image3" property="image3"></result>
+        <result column="p_productPrice" property="productPrice"></result>
+        <result column="p_sales" property="sales"></result>
+        <result column="p_repositry" property="repositry"></result>
+
+        <collection property="discussList" ofType="Discuss">
+            <id column="d_id" property="id"></id>
+            <result column="d_nickname" property="nickname"></result>
+            <result column="d_time" property="time"></result>
+            <result column="d_content" property="content"></result>
+            <result column="d_zan" property="zan"></result>
+            <association property="style" javaType="style">
+                <id column="s_id" property="s_id"></id>
+                <result column="s_styleName" property="styleName"></result>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="getProductDetailDiscuss" resultType="integer" resultMap="productAndDiscuss">
+   select p.id                                  p_id,
+       p.productName                            p_productName,
+       p.image                                  p_image,
+       p.image2                                 p_image2,
+       p.image3                                 p_image3,
+       p.productPrice                           p_productPrice,
+       p.repositry                              p_repositry,
+       p.sales                                  p_sales,
+       d.id                                     d_id,
+       d.d_s_id                                 d_s_id,
+       d.nickname                               d_nickname,
+       DATE_FORMAT(d.time, '%Y-%m-%d %h:%m:%s') d_time,
+       d.content                                d_content,
+       d.zan                                    d_zan,
+       s.styleName                              s_styleName,
+       s.s_id                                   s_id
+from productdetail as p
+    left join style s on   s.s_p_id = p.id
+    left join discuss as d on p.id = d.p_id and s.s_id = d.d_s_id
+where p.id = #{id}
+
+
+</select>
+
+
+    <resultMap id="productStyleSize" type="ProductDetailStyleSize">
+        <id column="p_id" property="id"></id>
+        <result column="p_productName" property="productName"></result>
+        <result column="p_image" property="image"></result>
+        <result column="p_productPrice" property="productPrice"></result>
+        <result column="p_sales" property="sales"></result>
+        <result column="p_repositry" property="repositry"></result>
+        <collection property="categaries" ofType="Categary">
+            <id column="c_id" property="c_id"></id>
+            <result column="c_type" property="type"></result>
+        </collection>
+        <collection property="styleList" ofType="style">
+            <id column="s_id" property="s_id"></id>
+            <id column="s_c_id" property="s_c_id"></id>
+            <id column="s_p_id" property="s_p_id"></id>
+            <result column="s_styleName" property="styleName"></result>
+        </collection>
+
+    </resultMap>
+
+
+    <select id="getProductStyleSize" parameterType="integer" resultMap="productStyleSize">
+select p.id           p_id,
+       p.productName  p_productName,
+       p.productPrice p_productPrice,
+       p.repositry    p_repositry,
+       p.sales        p_sales,
+       p.image        p_image,
+       s.styleName    s_styleName,
+       s.s_id         s_id,
+       c.c_id         c_id,
+       c.type         c_type,
+       s.s_c_id       s_c_id
+from productdetail p
+         left join categary c on c.c_p_id = p.id
+         left join style s on p.id = s.s_p_id and c.c_id=s.s_c_id
+where p.id = #{id}
+
+
+    </select>
+
+</mapper>

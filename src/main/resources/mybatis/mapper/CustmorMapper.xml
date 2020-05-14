@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hukun.uniappshopdata.basedata.mapper.CustomerMapper">
+
+    <select id="login" parameterType="customer" resultType="customer">
+    select * from customer where mobileNumber=#{mobileNumber} and password=#{password}
+</select>
+
+
+    <resultMap id="CustomerAddress" type="CustomerAddress">
+        <id column="c_id" property="id"></id>
+        <collection property="addressList" ofType="Address">
+            <id column="ac_id" property="ac_id"></id>
+            <result column="address" property="address"></result>
+            <result column="receivername" property="receivername"></result>
+            <result column="mobile" property="mobile"></result>
+            <result column="area" property="area"></result>
+            <result column="c_id" property="c_id"></result>
+            <result column="default_" property="default_"></result>
+        </collection>
+
+    </resultMap>
+
+    <select id="getCustomerAddressInfo" parameterType="integer" resultMap="CustomerAddress">
+select
+    c.id c_id,
+    ac.ac_id,
+    ac.address,
+    ac.receivername,
+    ac.mobile,
+    ac.area,
+    ac.c_id ,
+    ac.default_
+from customer c
+         left join address_customer ac on c.id = ac.c_id
+where c.id = #{id}
+
+    </select>
+
+
+    <select id="getDefaultCustomerAddress" parameterType="integer" resultType="Address">
+select
+    ac.ac_id,
+    ac.address,
+    ac.receivername,
+    ac.mobile,
+    ac.area,
+    ac.c_id ,
+    ac.default_
+from  address_customer ac
+where ac.c_id = #{id} and ac.default_ = true
+
+    </select>
+
+    <update id="updateAddress" parameterType="address">
+        update  address_customer
+         set
+             address = #{address},
+             receivername = #{receivername},
+             mobile = #{mobile},
+             area=#{area},
+             default_ = #{default_}
+        where ac_id=#{ac_id}
+    </update>
+
+    <update id="setDefaultAddress" parameterType="address">
+        update address_customer
+          set default_  = 0
+        where c_id=#{c_id}
+    </update>
+
+    <insert id="insertAddress" parameterType="address">
+        insert into address_customer values(#{ac_id},#{address},#{c_id},#{receivername},#{default_},#{area},#{mobile})
+    </insert>
+
+</mapper>
