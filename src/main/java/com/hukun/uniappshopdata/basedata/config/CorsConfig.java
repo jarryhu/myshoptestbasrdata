@@ -8,7 +8,7 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * 解决跨域的问题
- * @author
+ * @author hukun
  * Create on
  * All right reserved
  */
